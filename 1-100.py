@@ -157,4 +157,90 @@ def fast_primes(n):
 
 def sum_of_all_primes_below(n):
 	return sum(fast_primes(n))
-		
+
+
+# 12.
+# What is the value of the first triangle number to have over 
+# five hundred divisors?
+def triangle_number_over_n_divisors(n):
+	curr = 1
+	idx  = 2
+	while len(factors(curr)) < n:
+		curr += idx
+		idx += 1
+	return curr
+
+# 13.
+# Work out the first ten digits of the sum of the following 
+# one-hundred 50-digit numbers.
+def large_sum(list_numbers):
+	return sum(list_numbers)
+
+# 16.
+# What is the sum of the digits of the number 21000?
+def sum_digits(num):
+	return sum([int(x) for x in str(num)])
+	
+# 20.
+# Find the sum of the digits in the number 100!
+def factorial_digit_sum(n):
+	temp = [1, 1]
+	for i in range(1, n + 1):
+		temp[0], temp[1] = temp[1], i * temp[1]
+	fact = temp[1]
+	return sum([int(x) for x in str(fact)])
+	
+# 25.
+# What is the index of the first term in the Fibonacci 
+# sequence to contain 1000 digits?
+def fib_index_digits(n):
+	temp = [1, 1]
+	idx  = 1   
+	while True:
+		print(temp[0])
+		temp[0], temp[1] = temp[1], sum(temp)
+		if len(str(temp[0])) == n:
+			return idx + 1
+		idx += 1
+
+# 33.
+# There are exactly four non-trivial examples of this type of fraction, 
+# less than one in value, and containing two digits in the numerator and denominator.
+# If the product of these four fractions is given in its lowest common terms, 
+# find the value of the denominator.
+def is_curious(numerator, denominator):
+	value = numerator / float(denominator)
+	numerator_without_tens   = int(str(numerator)[0])
+	numerator_without_ones   = int(str(numerator)[1])
+	denominator_without_tens = int(str(denominator)[0])
+	denominator_without_ones = int(str(denominator)[1])
+	
+	if numerator_without_ones == denominator_without_ones:
+		return numerator_without_tens / float(denominator_without_tens) == value
+	elif numerator_without_ones == denominator_without_tens:
+		return numerator_without_tens / float(denominator_without_ones) == value
+	elif numerator_without_tens == denominator_without_ones:
+		return numerator_without_ones / float(denominator_without_tens) == value
+	elif numerator_without_tens == denominator_without_tens:
+		return numerator_without_ones / float(denominator_without_ones) == value
+	
+def digit_cancelling_fractions():
+	# Initialize dict matching each numerator with all possible denominators, e.g.
+	# {11:[12,13, ... , 99], 12:[13, ..., 99], ... , 97: [98, 99], 98: [99]}
+	d = {}
+	curious_fractions = []
+	for i in range(11, 100):
+		if i % 10 != 0:
+			d[i] = []
+			for j in range(i, 100):
+				first_digit = str(i)[0]
+				second_digit = str(i)[1]
+				if j != i and '0' not in str(j) and (first_digit in str(j) or second_digit in str(j)):
+					d[i].append(j)
+	# print(d)
+	for key, values in d.items():
+		for value in values:
+			if is_curious(key, value):
+				curious_fractions.append((key, value))
+	return
+	
