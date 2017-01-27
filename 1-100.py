@@ -93,3 +93,68 @@ def sum_square_difference(n):
 	sum_of_squares = n * (n + 1) * (2 * n + 1) / 6
 	square_of_sum  = sum(range(n + 1)) ** 2
 	return square_of_sum - sum_of_squares
+	
+# 7.
+# What is the 10 001st prime number?
+def prime_number(n):
+	if n == 1:
+		return 2
+	curr_num = 3
+	prime_count = 2
+	while prime_count < n:
+		curr_num += 2
+		if is_prime(curr_num):
+			prime_count += 1
+	return curr_num
+	
+# 8.
+# Find the thirteen adjacent digits in the 1000-digit number that have the greatest product. 
+# What is the value of this product?
+def largest_product_in_series(n, consecutive):
+	num_digits  = len(str(n))
+	digits     = [int(i) for i in str(n)]
+	max_product = 0
+	i = 0
+	while i <= num_digits - consecutive:
+		max_here = 1
+		for j in range(consecutive):
+			if digits[i + j] == 0:
+				i += j # Skip.
+				break
+			else:
+				max_here *= digits[i + j]
+			max_product = max(max_product, max_here)
+		i += 1
+	return max_product
+
+# 9.
+# There exists exactly one Pythagorean triplet for which a + b + c = 1000.
+# Find the product abc.
+# Notes: if a^2 + b^2 = c^2 and a + b + c = 1000, substitute for c and simplify.
+def special_pythagorean_triplet():
+	# a and b need to satisfy the following relation:
+	# a = (500000 - 1000 * b) / (1000 - b)
+	# Hence, (500000 - 1000 * b) mod (1000 - b) has to be 0. There are only a few choices for b then.
+	possibles = []
+	for i in range(1, 1000):
+		if (500000 - 1000 * i) % (1000 - i) == 0:
+			possibles.append(i)
+	for i in possibles:
+		a = (500000 - 1000 * i) / (1000 - i)
+		b = i
+		c = int(math.sqrt(a ** 2 + b ** 2))
+		if a + b + c == 1000:
+			return a * b * c
+
+# 10.
+# Find the sum of all the primes below two million.
+def fast_primes(n):
+    sieve = [True] * n
+    for i in xrange(3,int(n**0.5)+1,2):
+        if sieve[i]:
+            sieve[i*i::2*i]=[False]*((n-i*i-1)/(2*i)+1)
+    return [2] + [i for i in xrange(3,n,2) if sieve[i]]
+
+def sum_of_all_primes_below(n):
+	return sum(fast_primes(n))
+		
