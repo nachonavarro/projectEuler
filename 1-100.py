@@ -40,3 +40,56 @@ def largest_prime_factor(n):
 			if is_prime(curr):
 				return curr
 		curr -= 2
+
+# 4.
+# Find the largest palindrome made from the product of two 3-digit numbers.
+# Notes: I've checked only from 999 to 900, it worked out.
+def largest_palindrome():
+	# Create a dict like so:
+	# {999: [999, 998, ... , 900],
+	#  998: [998, 997, ..., 900],
+	#  997: [997, 996, ..., 900]}
+	d = {}
+	for i in range(999, 900, -1):
+		d[i] = [j for j in range(i, 900, -1)]
+	largest = 0
+	
+	# Look if palindrome.
+	for key in d:
+		for m in d[key]:
+			curr = m * key
+			to_str = str(curr)
+			if to_str == to_str[::-1] and curr > largest:
+				largest = curr
+	return largest
+	
+# 5.
+# What is the smallest positive number that is evenly divisible 
+# by all of the numbers from 1 to 20?
+def factors(n):    
+    return set(reduce(list.__add__, 
+                ([i, n//i] for i in range(1, int(n**0.5) + 1) if n % i == 0)))
+ 
+def evenly_divisible_until(n):
+	list_factors = factors(n)
+	# Only need to check on non-factors of 20.
+	check_nums = filter(lambda x: x not in list_factors, range(1, n + 1))
+	num = n
+	while True:
+		divisible = True
+		for i in check_nums:
+			if num % i != 0:
+				divisible = False
+				break
+		if divisible:
+			return num
+		else:
+			num += n
+			
+# 6.
+# Find the difference between the sum of the squares of the first one 
+# hundred natural numbers and the square of the sum.
+def sum_square_difference(n):
+	sum_of_squares = n * (n + 1) * (2 * n + 1) / 6
+	square_of_sum  = sum(range(n + 1)) ** 2
+	return square_of_sum - sum_of_squares
