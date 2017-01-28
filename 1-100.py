@@ -1,4 +1,4 @@
-import math
+import math, datetime
 
 # 1.
 # Find the sum of all the multiples of 3 or 5 below 1000.
@@ -176,11 +176,100 @@ def triangle_number_over_n_divisors(n):
 def large_sum(list_numbers):
 	return sum(list_numbers)
 
+# 14.
+# Which starting number, under one million, produces the longest chain
+# of a Collatz sequence?
+def collatz_sequence(n):
+	seq = [n]
+	while n > 1:
+		n = n / 2 if n % 2 == 0 else 3 * n + 1
+		seq.append(n)
+	return seq
+
+def longest_collatz_sequence_under(n):
+	longest = 0
+	starting_number = 0
+	for i in range(n - 1, 0, -1):
+		length = len(collatz_sequence(i))
+		if length > longest:
+			longest = length
+			starting_number = i
+	return starting_number
+
 # 16.
 # What is the sum of the digits of the number 21000?
 def sum_digits(num):
 	return sum([int(x) for x in str(num)])
+
+# 17.
+# If all the numbers from 1 to 1000 (one thousand) 
+# inclusive were written out in words, how many letters would be used?
+def letter_counts():
+	d = {0:'', 1:'one', 2:'two', 3:'three', 4:'four', 5:'five', 6:'six', 7:'seven',
+			 8:'eight', 9:'nine', 10:'ten', 11:'eleven', 12:'twelve', 13:'thirteen',
+			 14:'fourteen', 15:'fifteen', 16:'sixteen', 17:'seventeen', 18:'eighteen',
+			 19:'nineteen', 20:'twenty', 30:'thirty', 40:'forty', 50:'fifty', 60:'sixty',
+			 70:'seventy', 80:'eighty', 90:'ninety', 100:'hundred'}
+	count = 0
+	# 1 to 99
+	for num in range(1, 100):
+		if num in d:
+			print(d[num])
+			count += len(d[num])
+		else:
+			tens   = int(str(num)[0]) * 10
+			ones   = int(str(num)[1])
+			print(d[tens] + d[ones])
+			count += len(d[tens]) + len(d[ones])
 	
+	# 100 to 999
+	for num in range(100, 1000):
+		hundreds      = int(str(num)[0]) 
+		tens          = int(str(num)[1]) * 10
+		ones          = int(str(num)[2])
+		tens_and_ones = int(str(num)[1:3])
+		# Account for 'and'
+		if tens_and_ones in d and tens_and_ones:
+			count += len(d[hundreds]) + len('hundredand') + len(d[tens_and_ones])
+		elif tens and ones:
+			count += len(d[hundreds]) + len('hundredand') + len(d[tens]) + len(d[ones])
+		else:
+			count += len(d[hundreds]) + len('hundred') + len(d[tens]) + len(d[ones])
+	
+	# 1000
+	thousand = 'onethousand'
+	count += len(thousand)
+	return count
+
+# 18.
+# Find the maximum total from top to bottom of a triangle.
+# Notes: keep shrinking the triangle until there is only one element.
+# Input is in the format: [[1,2,3], [4,5], [6]]
+def maximum_path_sum(mat):
+	height = 0
+	while height < len(mat) - 1:
+		row = mat[height]
+		width = len(row)
+		updated_row = []
+		for i in range(width - 1):
+			updated_row.append(max(row[i], row[i + 1]))
+		mat[height + 1] = [x + y for x,y in zip(mat[height + 1], updated_row)]
+		height += 1
+	# We have propagated the sum up the triangle, hence the list containing
+	# the root has the answer, i.e., the first element of the last list in mat.
+	return mat[-1][0] 
+
+# 19.
+# How many Sundays fell on the first of the month during the twentieth century 
+# (1 Jan 1901 to 31 Dec 2000)?
+def counting_sundays_between(begin_year, end_year):
+	sundays = 0
+	for year in range(begin_year, end_year + 1):
+		for month in range(1, 13):
+			if datetime.datetime(year, month, 1).weekday() == 6:
+				sundays += 1
+	return sundays
+
 # 20.
 # Find the sum of the digits in the number 100!
 def factorial_digit_sum(n):
@@ -189,7 +278,28 @@ def factorial_digit_sum(n):
 		temp[0], temp[1] = temp[1], i * temp[1]
 	fact = temp[1]
 	return sum([int(x) for x in str(fact)])
-	
+
+# 22.
+# Working out the alphabetical value for each name in names.txt, 
+# multiply this value by its alphabetical position in the list to obtain a name score.
+# What is the total of all the name scores in the file?
+# names_list = []
+# with open('names.txt') as f:
+# 	for line in f:
+# 		for name in line.split(","):
+# 			names_list.append(name.strip('"'))
+def names_scores(names):
+	names.sort()
+	alphabet = {chr(n).upper() : n % 32 for n in range(97, 97 + 26)}
+	total = 0
+	print(alphabet)
+	for i,name in enumerate(names):
+		weight = sum(map(lambda x: alphabet[x], name))
+		total += (i + 1) * weight
+	return total
+		
+
+
 # 25.
 # What is the index of the first term in the Fibonacci 
 # sequence to contain 1000 digits?
