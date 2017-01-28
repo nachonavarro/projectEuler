@@ -1,4 +1,6 @@
 import math, datetime
+from collections import Counter
+from fractions import gcd
 
 # 1.
 # Find the sum of all the multiples of 3 or 5 below 1000.
@@ -6,7 +8,6 @@ def multiples_3_5(n):
 	list_3  = [3  * x for x in range(1, (n - 1) // 3  + 1)]
 	list_5  = [5  * x for x in range(1, (n - 1) // 5  + 1)]
 	list_15 = [15 * x for x in range(1, (n - 1) // 15 + 1)]
-	print(list_3, list_5, list_15)
 	return sum(list_3) + sum(list_5) - sum(list_15)
 
 # 2.
@@ -19,7 +20,6 @@ def sum_even_fib(n):
 		temp[0], temp[1] = temp[1], sum(temp)
 		if temp[0] % 2 == 0:
 			even_sum += temp[0]
-		print(temp)
 	return even_sum
 
 # 3.
@@ -69,7 +69,12 @@ def largest_palindrome():
 def factors(n):    
     return set(reduce(list.__add__, 
                 ([i, n//i] for i in range(1, int(n**0.5) + 1) if n % i == 0)))
- 
+
+def proper_factors(n):    
+    fact = set(reduce(list.__add__, 
+                ([i, n//i] for i in range(1, int(n**0.5) + 1) if n % i == 0)))
+    return [f for f in fact if f != n]
+
 def evenly_divisible_until(n):
 	list_factors = factors(n)
 	# Only need to check on non-factors of 20.
@@ -158,7 +163,43 @@ def fast_primes(n):
 def sum_of_all_primes_below(n):
 	return sum(fast_primes(n))
 
-
+# 11.
+# What is the greatest product of four adjacent numbers in the same direction 
+# (up, down, left, right, or diagonally) in the 20×20 grid?
+grid = []
+with open('grid.txt') as f:
+	for line in f:
+		row = []
+		for x in line.split():
+			row.append(int(x))
+		grid.append(row)
+def largest_product_in_grid(grid):
+	largest = 0
+	boundary_up   = 3
+	boundary_down = 16
+	# Brute force
+	for i in range(20):
+		for j in range(20):
+			up = down = left = right = 0
+			left_up = left_down = right_up = right_down = 0
+			if i <= boundary_down:
+				down  = grid[i][j] * grid[i + 1][j] * grid[i + 2][j] * grid[i + 3][j]
+			if i >= boundary_up:
+				up    = grid[i][j] * grid[i - 1][j] * grid[i - 2][j] * grid[i - 3][j]
+			if j <= boundary_down:
+				right = grid[i][j] * grid[i][j + 1] * grid[i][j + 2] * grid[i][j + 3]
+			if j >= boundary_up:
+				left  = grid[i][j] * grid[i][j - 1] * grid[i][j - 2] * grid[i][j - 3]
+			if i >= boundary_up and j >= boundary_up:
+				left_up = grid[i][j] * grid[i - 1][j - 1] * grid[i - 2][j - 2] * grid[i - 3][j - 3]
+			if i <= boundary_down and j >= boundary_up:
+				left_down = grid[i][j] * grid[i + 1][j - 1] * grid[i + 2][j - 2] * grid[i + 3][j - 3]
+			if i >= boundary_up and j <= boundary_down:
+				right_up = grid[i][j] * grid[i - 1][j + 1] * grid[i - 2][j + 2] * grid[i - 3][j + 3]
+			if i <= boundary_down and j <= boundary_down:
+				right_down = grid[i][j] * grid[i + 1][j + 1] * grid[i + 2][j + 2] * grid[i + 3][j + 3]
+			largest = max(up, down, right, left, left_up, left_down, right_up, right_down, largest)
+	return largest
 # 12.
 # What is the value of the first triangle number to have over 
 # five hundred divisors?
@@ -214,12 +255,10 @@ def letter_counts():
 	# 1 to 99
 	for num in range(1, 100):
 		if num in d:
-			print(d[num])
 			count += len(d[num])
 		else:
 			tens   = int(str(num)[0]) * 10
 			ones   = int(str(num)[1])
-			print(d[tens] + d[ones])
 			count += len(d[tens]) + len(d[ones])
 	
 	# 100 to 999
@@ -279,6 +318,22 @@ def factorial_digit_sum(n):
 	fact = temp[1]
 	return sum([int(x) for x in str(fact)])
 
+# 21.
+# Let d(n) be defined as the sum of proper divisors of n (numbers less than n 
+# which divide evenly into n). If d(a) = b and d(b) = a, where a ≠ b, then a and b 
+# are an amicable pair and each of a and b are called amicable numbers.
+# Evaluate the sum of all the amicable numbers under 10000.
+def is_amicable(n):
+	twin = sum(proper_factors(n))
+	return sum(proper_factors(twin)) == n and n != twin
+
+def sum_of_amicables():
+	amicables = []
+	for n in range(2, 10001):
+		if is_amicable(n):
+			amicables.append(n)
+	return sum(amicables)
+
 # 22.
 # Working out the alphabetical value for each name in names.txt, 
 # multiply this value by its alphabetical position in the list to obtain a name score.
@@ -292,13 +347,41 @@ def names_scores(names):
 	names.sort()
 	alphabet = {chr(n).upper() : n % 32 for n in range(97, 97 + 26)}
 	total = 0
-	print(alphabet)
 	for i,name in enumerate(names):
 		weight = sum(map(lambda x: alphabet[x], name))
 		total += (i + 1) * weight
 	return total
 		
+# 24.
+# What is the millionth lexicographic permutation of the digits 
+# 0, 1, 2, 3, 4, 5, 6, 7, 8 and 9?
+# Don't take credit for helper function.
+def next_permutation(arr):
+  # Find non-increasing suffix
+  arr = list(arr)
+  i = len(arr) - 1
+  while i > 0 and arr[i - 1] >= arr[i]:
+      i -= 1
+  if i <= 0:
+      return False
+  
+  # Find successor to pivot
+  j = len(arr) - 1
+  while arr[j] <= arr[i - 1]:
+      j -= 1
+  arr[i - 1], arr[j] = arr[j], arr[i - 1]
+  
+  # Reverse suffix
+  arr[i : ] = arr[len(arr) - 1 : i - 1 : -1]
+  return "".join(arr)
 
+def millionth_lexicographic():
+	counter = 1
+	curr    = '0123456789'
+	while counter < 1000000:
+		curr = next_permutation(curr)
+		counter += 1
+	return curr
 
 # 25.
 # What is the index of the first term in the Fibonacci 
@@ -307,11 +390,27 @@ def fib_index_digits(n):
 	temp = [1, 1]
 	idx  = 1   
 	while True:
-		print(temp[0])
 		temp[0], temp[1] = temp[1], sum(temp)
 		if len(str(temp[0])) == n:
 			return idx + 1
 		idx += 1
+
+# 30.
+# Find the sum of all the numbers that can be written as the sum of 
+# fifth powers of their digits.
+
+def fifth_power_sum():
+	# For fast access
+	surprising = []
+	d = {i:i**5 for i in range(10)}
+	limit = 6 * d[9] # Above this limit, no number can work
+	for i in range(100, limit):
+		total = 0
+		for x in [int(j) for j in str(i)]:
+			total += d[x]
+		if total == i:
+			surprising.append(i)
+	return sum(surprising)
 
 # 33.
 # There are exactly four non-trivial examples of this type of fraction, 
@@ -347,10 +446,8 @@ def digit_cancelling_fractions():
 				second_digit = str(i)[1]
 				if j != i and '0' not in str(j) and (first_digit in str(j) or second_digit in str(j)):
 					d[i].append(j)
-	# print(d)
 	for key, values in d.items():
 		for value in values:
 			if is_curious(key, value):
 				curious_fractions.append((key, value))
 	return
-	
